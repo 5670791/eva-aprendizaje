@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1629">
+<title>EVA — Módulo de Aprendizaje</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1629; color: white;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
+  header {
+    background: linear-gradient(135deg, #1a2d4a, #0f1629);
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid #2a3a5a;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p  { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+  .status-bar {
+    background: #1a2d4a; padding: 8px 16px;
+    font-size: 12px; color: #94a3b8;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;
+         animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  main { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; }
+
+  .card {
+    background:#1a2d4a; border-radius:16px;
+    border:1px solid #2a3a5a; overflow:hidden;
+  }
+  .card-header {
+    padding:14px 16px; border-bottom:1px solid #2a3a5a;
+    font-weight:600; font-size:15px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .card-body { padding:16px; }
+
+  .btn {
+    width:100%; padding:16px; border-radius:12px; border:none;
+    font-size:16px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:all 0.2s; -webkit-tap-highlight-color:transparent;
+  }
+  .btn:active { transform:scale(0.97); }
+  .btn+.btn { margin-top:10px; }
+  .btn-green  { background:#16a34a; color:white; }
+  .btn-blue   { background:#2563eb; color:white; }
+  .btn-red    { background:#dc2626; color:white; }
+  .btn-whatsapp { background:#25D366; color:white; font-size:17px; }
+
+  select {
+    width:100%; background:#0f1629; border:1px solid #2a3a5a;
+    border-radius:10px; color:white; padding:12px;
+    font-size:15px; outline:none; margin-bottom:10px;
+    -webkit-appearance:none;
+  }
+  textarea {
+    width:100%; background:#0f1629; border:1px solid #2a3a5a;
+    border-radius:10px; color:white; padding:12px;
+    font-size:15px; font-family:inherit; resize:none;
+    min-height:100px; outline:none;
+  }
+  textarea:focus { border-color:#2563eb; }
+  textarea::placeholder { color:#475569; }
+
+  .preview-img {
+    width:100%; border-radius:10px; margin-top:10px;
+    display:none; max-height:220px; object-fit:cover;
+  }
+
+  .btn-record {
+    width:80px; height:80px; border-radius:50%; font-size:32px;
+    margin:0 auto; display:flex; align-items:center; justify-content:center;
+    background:#dc2626; border:4px solid #ef4444;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:all 0.2s;
+  }
+  .btn-record.recording {
+    animation:ring 1.5s infinite; background:#b91c1c;
+  }
+  @keyframes ring {
+    0%   { box-shadow:0 0 0 0 rgba(220,38,38,0.6); }
+    70%  { box-shadow:0 0 0 20px rgba(220,38,38,0); }
+    100% { box-shadow:0 0 0 0 rgba(220,38,38,0); }
+  }
+  .timer { text-align:center; font-size:28px; font-weight:700;
+           color:#ef4444; margin:8px 0; font-family:'Courier New',monospace; }
+  .timer.hidden { display:none; }
+  .rec-label { text-align:center; font-size:13px; color:#94a3b8; margin-top:6px; }
+
+  .toast {
+    position:fixed; bottom:20px; left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:#16a34a; color:white;
+    padding:12px 24px; border-radius:24px;
+    font-size:14px; font-weight:600;
+    transition:transform 0.3s; z-index:999; white-space:nowrap;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast.error { background:#dc2626; }
+
+  .info-box {
+    background:#0f1629; border-radius:10px;
+    border:1px solid #2a3a5a; padding:12px;
+    font-size:13px; color:#94a3b8; margin-top:10px;
+  }
+  .info-box b { color:#22c55e; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">◉</div>
+  <div>
+    <h1>EVA · Aprendizaje</h1>
+    <p>Módulo campo — Golden Wash S.L.</p>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div class="dot"></div>
+  <span>Listo — envía observaciones a EVA por WhatsApp</span>
+</div>
+
+<main>
+
+  <!-- Tipo -->
+  <div class="card">
+    <div class="card-header">📋 Tipo de observación</div>
+    <div class="card-body">
+      <select id="tipoObs">
+        <option value="AVERIA">🔧 Avería detectada</option>
+        <option value="PREVENTIVO">🛠 Acción preventiva</option>
+        <option value="ESTACION">🏪 Datos de estación</option>
+        <option value="IOT">⚠️ Aviso IoT sospechoso</option>
+        <option value="APRENDIZAJE">🧠 Aprendizaje general</option>
+      </select>
+      <textarea id="txtNota"
+        placeholder="Describe la observación que EVA debe aprender...&#10;&#10;Ejemplo: La estación BEJAR II tiene problema crónico en electroválvula box. El técnico ISTOBAL la cambió 3 veces en 6 meses sin resolver la causa raíz."
+        rows="5"></textarea>
+    </div>
+  </div>
+
+  <!-- Foto -->
+  <div class="card">
+    <div class="card-header">📸 Foto (opcional)</div>
+    <div class="card-body">
+      <button class="btn btn-blue" onclick="document.getElementById('inputFoto').click()">
+        📷 Hacer foto
+      </button>
+      <input type="file" id="inputFoto" accept="image/*" capture="environment"
+             style="display:none" onchange="previewFoto(this)">
+      <img id="prevImg" class="preview-img" alt="">
+    </div>
+  </div>
+
+  <!-- Voz -->
+  <div class="card">
+    <div class="card-header">🎤 Nota de voz (opcional)</div>
+    <div class="card-body" style="text-align:center">
+      <button class="btn-record" id="btnRec" onclick="toggleRec()">🎤</button>
+      <div class="timer hidden" id="timer">0:00</div>
+      <div class="rec-label" id="recLabel">Pulsa para grabar</div>
+      <audio id="audioPreview" controls style="width:100%;margin-top:12px;display:none"></audio>
+    </div>
+  </div>
+
+  <!-- Enviar por WhatsApp -->
+  <div class="card">
+    <div class="card-header">📲 Enviar a EVA</div>
+    <div class="card-body">
+      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+        💬 Enviar por WhatsApp a EVA
+      </button>
+      <div class="info-box">
+        <b>¿Cómo funciona?</b><br>
+        1. Pulsa el botón verde<br>
+        2. Se abre WhatsApp con el mensaje listo<br>
+        3. Selecciona <b>"Mis chats"</b> (tú mismo)<br>
+        4. Pulsa enviar ✓<br>
+        5. En OFI-JUANMA ATIA recoge el mensaje
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let audioBlob = null;
+let grabando = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let timerInt = null;
+let segs = 0;
+
+function previewFoto(inp) {
+  if (!inp.files[0]) return;
+  const img = document.getElementById('prevImg');
+  img.src = URL.createObjectURL(inp.files[0]);
+  img.style.display = 'block';
+  toast('📸 Foto lista');
+}
+
+async function toggleRec() {
+  if (!grabando) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, {type:'audio/webm'});
+        const url = URL.createObjectURL(audioBlob);
+        const a = document.getElementById('audioPreview');
+        a.src = url; a.style.display = 'block';
+        toast('🎤 Grabación lista');
+      };
+      mediaRecorder.start();
+      grabando = true; segs = 0;
+      document.getElementById('btnRec').classList.add('recording');
+      document.getElementById('btnRec').textContent = '⏹';
+      document.getElementById('recLabel').textContent = 'Grabando... pulsa para parar';
+      document.getElementById('timer').classList.remove('hidden');
+      timerInt = setInterval(() => {
+        segs++;
+        const m = Math.floor(segs/60), s = segs%60;
+        document.getElementById('timer').textContent = m+':'+(s<10?'0':'')+s;
+      }, 1000);
+    } catch(e) { toast('⚠ Sin permiso de micrófono', true); }
+  } else {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+    grabando = false;
+    clearInterval(timerInt);
+    document.getElementById('btnRec').classList.remove('recording');
+    document.getElementById('btnRec').textContent = '🎤';
+    document.getElementById('recLabel').textContent = 'Pulsa para grabar otra';
+    document.getElementById('timer').classList.add('hidden');
+  }
+}
+
+function enviarWhatsApp() {
+  const nota = document.getElementById('txtNota').value.trim();
+  const tipo = document.getElementById('tipoObs').value;
+  const fecha = new Date().toLocaleString('es-ES');
+
+  if (!nota) { toast('⚠ Escribe una observación primero', true); return; }
+
+  // Formato que ATIA reconoce
+  const msg =
+    '🤖 EVA_APRENDIZAJE\n' +
+    '━━━━━━━━━━━━━━━━━\n' +
+    'TIPO: ' + tipo + '\n' +
+    'FECHA: ' + fecha + '\n' +
+    'NOTA: ' + nota + '\n' +
+    '━━━━━━━━━━━━━━━━━';
+
+  // Abrir WhatsApp con el mensaje
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+
+  toast('✓ Abre WhatsApp → Mis chats → Enviar');
+
+  // Limpiar
+  setTimeout(() => {
+    document.getElementById('txtNota').value = '';
+    document.getElementById('prevImg').style.display = 'none';
+    document.getElementById('audioPreview').style.display = 'none';
+    audioBlob = null;
+  }, 2000);
+}
+
+function toast(msg, error=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error?' error':'');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
