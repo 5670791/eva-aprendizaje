@@ -1,26 +1,16 @@
 {
-  "name": "EVA · Módulo de Aprendizaje",
-  "short_name": "EVA Aprende",
-  "description": "Módulo de campo para alimentar a EVA — Golden Wash S.L.",
-  "start_url": "/",
+  "name": "CHAT EVA-JUANMA",
+  "short_name": "EVA Chat",
+  "description": "Canal privado entre EVA (ATIA) y Juan Manuel — Golden Wash",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f1629",
-  "theme_color": "#0f1629",
+  "background_color": "#0b1220",
+  "theme_color": "#0f1d33",
   "orientation": "portrait",
+  "lang": "es",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["utilities", "productivity"],
-  "lang": "es"
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
 }

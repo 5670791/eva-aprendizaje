@@ -1,301 +1,239 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0f1629">
-<title>EVA — Módulo de Aprendizaje</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1d33">
+<title>CHAT EVA-JUANMA</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- © Juan Manuel Notario — Golden Wash / ATIA-EVA. Patente en trámite. -->
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f1629; color: white;
-    min-height: 100vh; display: flex; flex-direction: column;
-  }
-  header {
-    background: linear-gradient(135deg, #1a2d4a, #0f1629);
-    padding: 20px 16px 16px;
-    border-bottom: 1px solid #2a3a5a;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .logo {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  header h1 { font-size: 20px; font-weight: 700; }
-  header p  { font-size: 12px; color: #94a3b8; margin-top: 2px; }
-
-  .status-bar {
-    background: #1a2d4a; padding: 8px 16px;
-    font-size: 12px; color: #94a3b8;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;
-         animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  main { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; }
-
-  .card {
-    background:#1a2d4a; border-radius:16px;
-    border:1px solid #2a3a5a; overflow:hidden;
-  }
-  .card-header {
-    padding:14px 16px; border-bottom:1px solid #2a3a5a;
-    font-weight:600; font-size:15px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .card-body { padding:16px; }
-
-  .btn {
-    width:100%; padding:16px; border-radius:12px; border:none;
-    font-size:16px; font-weight:600; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    transition:all 0.2s; -webkit-tap-highlight-color:transparent;
-  }
-  .btn:active { transform:scale(0.97); }
-  .btn+.btn { margin-top:10px; }
-  .btn-green  { background:#16a34a; color:white; }
-  .btn-blue   { background:#2563eb; color:white; }
-  .btn-red    { background:#dc2626; color:white; }
-  .btn-whatsapp { background:#25D366; color:white; font-size:17px; }
-
-  select {
-    width:100%; background:#0f1629; border:1px solid #2a3a5a;
-    border-radius:10px; color:white; padding:12px;
-    font-size:15px; outline:none; margin-bottom:10px;
-    -webkit-appearance:none;
-  }
-  textarea {
-    width:100%; background:#0f1629; border:1px solid #2a3a5a;
-    border-radius:10px; color:white; padding:12px;
-    font-size:15px; font-family:inherit; resize:none;
-    min-height:100px; outline:none;
-  }
-  textarea:focus { border-color:#2563eb; }
-  textarea::placeholder { color:#475569; }
-
-  .preview-img {
-    width:100%; border-radius:10px; margin-top:10px;
-    display:none; max-height:220px; object-fit:cover;
-  }
-
-  .btn-record {
-    width:80px; height:80px; border-radius:50%; font-size:32px;
-    margin:0 auto; display:flex; align-items:center; justify-content:center;
-    background:#dc2626; border:4px solid #ef4444;
-    cursor:pointer; -webkit-tap-highlight-color:transparent;
-    transition:all 0.2s;
-  }
-  .btn-record.recording {
-    animation:ring 1.5s infinite; background:#b91c1c;
-  }
-  @keyframes ring {
-    0%   { box-shadow:0 0 0 0 rgba(220,38,38,0.6); }
-    70%  { box-shadow:0 0 0 20px rgba(220,38,38,0); }
-    100% { box-shadow:0 0 0 0 rgba(220,38,38,0); }
-  }
-  .timer { text-align:center; font-size:28px; font-weight:700;
-           color:#ef4444; margin:8px 0; font-family:'Courier New',monospace; }
-  .timer.hidden { display:none; }
-  .rec-label { text-align:center; font-size:13px; color:#94a3b8; margin-top:6px; }
-
-  .toast {
-    position:fixed; bottom:20px; left:50%;
-    transform:translateX(-50%) translateY(100px);
-    background:#16a34a; color:white;
-    padding:12px 24px; border-radius:24px;
-    font-size:14px; font-weight:600;
-    transition:transform 0.3s; z-index:999; white-space:nowrap;
-  }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-  .toast.error { background:#dc2626; }
-
-  .info-box {
-    background:#0f1629; border-radius:10px;
-    border:1px solid #2a3a5a; padding:12px;
-    font-size:13px; color:#94a3b8; margin-top:10px;
-  }
-  .info-box b { color:#22c55e; }
+:root{--fondo:#0b1220;--cab:#0f1d33;--borde:#1e3a5f;--eva:#13233f;--yo:#1e5b3a;--txt:#e6edf7;--sub:#94a3b8;--azul:#38bdf8;--ambar:#f59e0b;--rojo:#ef4444;--verde:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--fondo);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column}
+.oculto{display:none!important}
+header{background:var(--cab);border-bottom:1px solid var(--borde);padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:12px}
+.av{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,#38bdf8,#1e3a8a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex:none}
+header b{font-size:17px;display:block}header small{color:var(--verde);font-size:12px}
+header .esp{flex:1}
+.bt-ico{background:#13233f;border:1px solid var(--borde);color:#fff;border-radius:999px;padding:6px 10px;font-size:13px}
+#chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:84%;padding:9px 11px;border-radius:14px;font-size:15px;line-height:1.38;white-space:pre-wrap;word-wrap:break-word}
+.m.eva{background:var(--eva);border-top-left-radius:4px;align-self:flex-start}
+.m.yo{background:var(--yo);border-top-right-radius:4px;align-self:flex-end}
+.m .h{font-size:10px;color:var(--sub);text-align:right;margin-top:3px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:4px}
+.t-duda{background:var(--ambar);color:#111}.t-aviso{background:var(--rojo);color:#fff}.t-nota{background:var(--azul);color:#04121f}
+.cita{border-left:3px solid var(--azul);padding:3px 7px;margin-bottom:5px;font-size:12px;color:var(--sub);background:rgba(0,0,0,.18);border-radius:4px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.btns button{background:var(--fondo);border:1px solid var(--azul);color:var(--azul);font-size:13px;padding:6px 11px;border-radius:999px}
+.m img{max-width:100%;border-radius:8px;margin-top:6px;display:block}
+.m audio{width:230px;margin-top:6px}
+.dia{align-self:center;font-size:11px;color:var(--sub);background:#0f1d33;padding:3px 10px;border-radius:999px;margin:4px 0}
+footer{background:var(--cab);border-top:1px solid var(--borde);padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+#resp{display:flex;align-items:center;gap:8px;background:#0b1220;border-left:3px solid var(--ambar);padding:6px 8px;border-radius:6px;margin-bottom:7px;font-size:12px;color:var(--sub)}
+#resp span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#resp button{background:none;border:none;color:var(--sub);font-size:18px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:7px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;font-size:12px;padding:5px 10px;border-radius:999px;background:#13233f;color:#cbd5e1;border:1px solid transparent}
+.chips button.on{background:var(--azul);color:#04121f;font-weight:700}
+#adj{display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:12px;color:var(--sub)}
+#adj img{height:46px;border-radius:6px}
+.fila{display:flex;gap:8px;align-items:flex-end}
+textarea{flex:1;resize:none;background:#0b1220;border:1px solid #334155;border-radius:20px;color:var(--txt);padding:10px 14px;font-size:15px;max-height:120px;font-family:inherit}
+.ic{width:44px;height:44px;border-radius:50%;background:#13233f;border:none;color:#fff;font-size:19px;flex:none}
+.ic.env{background:var(--verde)}.ic.grab{background:var(--rojo);animation:lat 1s infinite}
+@keyframes lat{50%{opacity:.6}}
+#login{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px;gap:14px}
+#login h1{font-size:22px;text-align:center}#login p{color:var(--sub);text-align:center;font-size:14px}
+#login input{background:#0b1220;border:1px solid #334155;border-radius:12px;color:var(--txt);padding:13px;font-size:16px}
+#login button{background:var(--azul);color:#04121f;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:700}
+#err{color:var(--rojo);text-align:center;font-size:13px;min-height:18px}
+.pie{color:#475569;font-size:10px;text-align:center;margin-top:20px}
+#toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#111827;border:1px solid var(--azul);padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:.3s;pointer-events:none}
+#toast.v{opacity:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">◉</div>
-  <div>
-    <h1>EVA · Aprendizaje</h1>
-    <p>Módulo campo — Golden Wash S.L.</p>
-  </div>
+  <div class="av">EVA</div>
+  <div><b>EVA</b><small id="estado">● ATIA · Golden Wash</small></div>
+  <div class="esp"></div>
+  <button class="bt-ico oculto" id="btAvisos" onclick="activarAvisos()">🔔 Activar avisos</button>
 </header>
 
-<div class="status-bar">
-  <div class="dot"></div>
-  <span>Listo — envía observaciones a EVA por WhatsApp</span>
-</div>
+<section id="login">
+  <div class="av" style="width:72px;height:72px;margin:0 auto;font-size:20px">EVA</div>
+  <h1>CHAT EVA-JUANMA</h1>
+  <p>Canal privado entre EVA y Juan Manuel.<br>Entra con la cuenta de ATIA.</p>
+  <input id="lEmail" type="email" placeholder="Correo" autocomplete="username">
+  <input id="lPass" type="password" placeholder="Contraseña" autocomplete="current-password">
+  <button onclick="entrar()">Entrar</button>
+  <div id="err"></div>
+  <div class="pie">© Juan Manuel Notario — Golden Wash / ATIA-EVA · Patentes solicitadas</div>
+</section>
 
-<main>
+<main id="chat" class="oculto"></main>
 
-  <!-- Tipo -->
-  <div class="card">
-    <div class="card-header">📋 Tipo de observación</div>
-    <div class="card-body">
-      <select id="tipoObs">
-        <option value="AVERIA">🔧 Avería detectada</option>
-        <option value="PREVENTIVO">🛠 Acción preventiva</option>
-        <option value="ESTACION">🏪 Datos de estación</option>
-        <option value="IOT">⚠️ Aviso IoT sospechoso</option>
-        <option value="APRENDIZAJE">🧠 Aprendizaje general</option>
-      </select>
-      <textarea id="txtNota"
-        placeholder="Describe la observación que EVA debe aprender...&#10;&#10;Ejemplo: La estación BEJAR II tiene problema crónico en electroválvula box. El técnico ISTOBAL la cambió 3 veces en 6 meses sin resolver la causa raíz."
-        rows="5"></textarea>
-    </div>
+<footer id="pie" class="oculto">
+  <div id="resp" class="oculto"><span id="respTxt"></span><button onclick="quitarResp()">✕</button></div>
+  <div class="chips" id="chips">
+    <button data-t="AVERIA">🔧 Avería</button>
+    <button data-t="PREVENTIVO">🛠 Preventivo</button>
+    <button data-t="ESTACION">🏪 Estación</button>
+    <button data-t="AVISO_AUTOMATICO">⚠️ Aviso automático</button>
+    <button data-t="APRENDIZAJE">🧠 Aprendizaje</button>
   </div>
-
-  <!-- Foto -->
-  <div class="card">
-    <div class="card-header">📸 Foto (opcional)</div>
-    <div class="card-body">
-      <button class="btn btn-blue" onclick="document.getElementById('inputFoto').click()">
-        📷 Hacer foto
-      </button>
-      <input type="file" id="inputFoto" accept="image/*" capture="environment"
-             style="display:none" onchange="previewFoto(this)">
-      <img id="prevImg" class="preview-img" alt="">
-    </div>
+  <div id="adj" class="oculto"><img id="adjImg" class="oculto"><span id="adjTxt"></span><button class="bt-ico" onclick="quitarAdj()">Quitar</button></div>
+  <div class="fila">
+    <textarea id="txt" rows="1" placeholder="Escribe a EVA…" oninput="autoAlto(this)"></textarea>
+    <button class="ic" onclick="document.getElementById('foto').click()">📷</button>
+    <button class="ic env" id="btEnv" onclick="botonEnviar()">🎤</button>
   </div>
+  <input type="file" id="foto" accept="image/*" capture="environment" class="oculto" onchange="elegirFoto(this)">
+</footer>
+<div id="toast"></div>
 
-  <!-- Voz -->
-  <div class="card">
-    <div class="card-header">🎤 Nota de voz (opcional)</div>
-    <div class="card-body" style="text-align:center">
-      <button class="btn-record" id="btnRec" onclick="toggleRec()">🎤</button>
-      <div class="timer hidden" id="timer">0:00</div>
-      <div class="rec-label" id="recLabel">Pulsa para grabar</div>
-      <audio id="audioPreview" controls style="width:100%;margin-top:12px;display:none"></audio>
-    </div>
-  </div>
-
-  <!-- Enviar por WhatsApp -->
-  <div class="card">
-    <div class="card-header">📲 Enviar a EVA</div>
-    <div class="card-body">
-      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
-        💬 Enviar por WhatsApp a EVA
-      </button>
-      <div class="info-box">
-        <b>¿Cómo funciona?</b><br>
-        1. Pulsa el botón verde<br>
-        2. Se abre WhatsApp con el mensaje listo<br>
-        3. Selecciona <b>"Mis chats"</b> (tú mismo)<br>
-        4. Pulsa enviar ✓<br>
-        5. En OFI-JUANMA ATIA recoge el mensaje
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<div class="toast" id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-let audioBlob = null;
-let grabando = false;
-let mediaRecorder = null;
-let audioChunks = [];
-let timerInt = null;
-let segs = 0;
+// Proyecto Supabase «Atia-nucleo» (clave PÚBLICA, la misma de la web ATIA; no es secreta).
+const SUPA_URL = "https://ajjafkegtgtpueruvibx.supabase.co";
+const SUPA_KEY = "sb_publishable_JiXf7F6DTA1ydtiV31pNPw_vpp_VxiS";
+const BUCKET = "eva-chat";
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+let etiqueta = null, respA = null, fotoBlob = null, audioBlob = null, grab = null, trozos = [];
+const vistos = new Set();
+const $ = id => document.getElementById(id);
 
-function previewFoto(inp) {
-  if (!inp.files[0]) return;
-  const img = document.getElementById('prevImg');
-  img.src = URL.createObjectURL(inp.files[0]);
-  img.style.display = 'block';
-  toast('📸 Foto lista');
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('v');setTimeout(()=>e.classList.remove('v'),2600)}
+function autoAlto(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';pintarBoton()}
+function pintarBoton(){$('btEnv').textContent=(grab?'⏹':($('txt').value.trim()||fotoBlob||audioBlob?'➤':'🎤'))}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function hora(d){return new Date(d).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
+
+// ── Sesión ──────────────────────────────────────────────────────────────
+async function entrar(){
+  $('err').textContent='';
+  const {error}=await sb.auth.signInWithPassword({email:$('lEmail').value.trim(),password:$('lPass').value});
+  if(error){$('err').textContent='No se pudo entrar: '+error.message;return}
+  arrancar();
+}
+async function arrancar(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){$('login').classList.remove('oculto');return}
+  $('login').classList.add('oculto');$('chat').classList.remove('oculto');$('pie').classList.remove('oculto');
+  await cargar();
+  sb.channel('chat').on('postgres_changes',{event:'INSERT',schema:'public',table:'eva_chat_mensajes'},p=>{pintar(p.new);abajo();marcarLeido()}).subscribe();
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  if('Notification' in window && Notification.permission!=='granted') $('btAvisos').classList.remove('oculto');
+  else if('Notification' in window) activarAvisos(true);
 }
 
-async function toggleRec() {
-  if (!grabando) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        audioBlob = new Blob(audioChunks, {type:'audio/webm'});
-        const url = URL.createObjectURL(audioBlob);
-        const a = document.getElementById('audioPreview');
-        a.src = url; a.style.display = 'block';
-        toast('🎤 Grabación lista');
-      };
-      mediaRecorder.start();
-      grabando = true; segs = 0;
-      document.getElementById('btnRec').classList.add('recording');
-      document.getElementById('btnRec').textContent = '⏹';
-      document.getElementById('recLabel').textContent = 'Grabando... pulsa para parar';
-      document.getElementById('timer').classList.remove('hidden');
-      timerInt = setInterval(() => {
-        segs++;
-        const m = Math.floor(segs/60), s = segs%60;
-        document.getElementById('timer').textContent = m+':'+(s<10?'0':'')+s;
-      }, 1000);
-    } catch(e) { toast('⚠ Sin permiso de micrófono', true); }
-  } else {
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t=>t.stop());
-    grabando = false;
-    clearInterval(timerInt);
-    document.getElementById('btnRec').classList.remove('recording');
-    document.getElementById('btnRec').textContent = '🎤';
-    document.getElementById('recLabel').textContent = 'Pulsa para grabar otra';
-    document.getElementById('timer').classList.add('hidden');
-  }
+// ── Mensajes ────────────────────────────────────────────────────────────
+let mapa={}, ultimoDia='';
+async function cargar(){
+  const {data,error}=await sb.from('eva_chat_mensajes').select('*').order('creado',{ascending:false}).limit(150);
+  if(error){toast('Error: '+error.message);return}
+  (data||[]).reverse().forEach(pintar);abajo();marcarLeido();
+}
+async function marcarLeido(){await sb.from('eva_chat_mensajes').update({leido_movil:true}).eq('de','eva').eq('leido_movil',false)}
+function abajo(){const c=$('chat');c.scrollTop=c.scrollHeight}
+async function urlFirmada(ruta){const {data}=await sb.storage.from(BUCKET).createSignedUrl(ruta,3600);return data?data.signedUrl:''}
+
+function pintar(m){
+  if(vistos.has(m.id))return; vistos.add(m.id); mapa[m.id]=m;
+  const dia=new Date(m.creado).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  if(dia!==ultimoDia){ultimoDia=dia;const d=document.createElement('div');d.className='dia';d.textContent=dia;$('chat').appendChild(d)}
+  const el=document.createElement('div'); el.className='m '+(m.de==='eva'?'eva':'yo');
+  let h='';
+  if(m.responde_a&&mapa[m.responde_a]) h+=`<div class="cita">${esc((mapa[m.responde_a].texto||'').slice(0,90))}</div>`;
+  if(m.tipo==='duda') h+=`<span class="tag t-duda">❓ DUDA · ${esc(m.etiqueta||'agente')}</span><br>`;
+  else if(m.tipo==='aviso') h+=`<span class="tag t-aviso">🔔 AVISO NUEVO · ${esc(m.etiqueta||'')}</span><br>`;
+  else if(m.de==='juanma'&&m.etiqueta) h+=`<span class="tag t-nota">${esc(m.etiqueta)}</span><br>`;
+  if(m.tipo==='accion') h+=`<i>${({historial:'📜 Historial',pdf:'📄 Ver PDF',asignar:'👷 Asignar SAT'})[(m.datos||{}).accion]||'Acción'}</i>`;
+  else h+=esc(m.texto);
+  const d=m.datos||{};
+  if(d.enlace) h+=`<div class="btns"><button onclick="window.open('${d.enlace}','_blank')">📄 Abrir PDF</button></div>`;
+  if(m.tipo==='aviso') h+=`<div class="btns"><button onclick="accion('${m.id}','historial')">📜 Historial</button><button onclick="accion('${m.id}','pdf')">📄 Ver PDF</button><button onclick="accion('${m.id}','asignar')">👷 Asignar SAT</button></div>`;
+  if(m.tipo==='duda') h+=`<div class="btns"><button onclick="responder('${m.id}')">↩ Responder</button></div>`;
+  h+=`<div class="h">${hora(m.creado)}${m.de==='juanma'?(m.recogido_atia?' ✓✓':' ✓'):''}</div>`;
+  el.innerHTML=h;
+  if(m.adjunto_foto) urlFirmada(m.adjunto_foto).then(u=>{if(u){const i=document.createElement('img');i.src=u;el.insertBefore(i,el.lastChild)}});
+  if(m.adjunto_audio) urlFirmada(m.adjunto_audio).then(u=>{if(u){const a=document.createElement('audio');a.controls=true;a.src=u;el.insertBefore(a,el.lastChild)}});
+  $('chat').appendChild(el);
+}
+function responder(id){respA=id;$('respTxt').textContent='Respondiendo a: '+(mapa[id].texto||'').slice(0,80);$('resp').classList.remove('oculto');$('txt').focus()}
+function quitarResp(){respA=null;$('resp').classList.add('oculto')}
+async function accion(id,acc){
+  const {error}=await sb.from('eva_chat_mensajes').insert({de:'juanma',tipo:'accion',datos:{accion:acc},responde_a:id});
+  toast(error?'Error: '+error.message:'Enviado a ATIA');
 }
 
-function enviarWhatsApp() {
-  const nota = document.getElementById('txtNota').value.trim();
-  const tipo = document.getElementById('tipoObs').value;
-  const fecha = new Date().toLocaleString('es-ES');
+// ── Etiquetas ───────────────────────────────────────────────────────────
+document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>{
+  const on=b.classList.contains('on');document.querySelectorAll('#chips button').forEach(x=>x.classList.remove('on'));
+  etiqueta=on?null:b.dataset.t;if(!on)b.classList.add('on');
+});
 
-  if (!nota) { toast('⚠ Escribe una observación primero', true); return; }
+// ── Foto (reducida a 1600 px) ───────────────────────────────────────────
+function elegirFoto(inp){
+  const f=inp.files[0];if(!f)return;const img=new Image();
+  img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height));const c=document.createElement('canvas');
+    c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{fotoBlob=b;$('adjImg').src=URL.createObjectURL(b);$('adjImg').classList.remove('oculto');$('adjTxt').textContent='Foto lista';$('adj').classList.remove('oculto');pintarBoton()},'image/jpeg',0.85)};
+  img.src=URL.createObjectURL(f);inp.value='';
+}
+function quitarAdj(){fotoBlob=null;audioBlob=null;$('adj').classList.add('oculto');$('adjImg').classList.add('oculto');pintarBoton()}
 
-  // Formato que ATIA reconoce
-  const msg =
-    '🤖 EVA_APRENDIZAJE\n' +
-    '━━━━━━━━━━━━━━━━━\n' +
-    'TIPO: ' + tipo + '\n' +
-    'FECHA: ' + fecha + '\n' +
-    'NOTA: ' + nota + '\n' +
-    '━━━━━━━━━━━━━━━━━';
-
-  // Abrir WhatsApp con el mensaje
-  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
-  window.open(url, '_blank');
-
-  toast('✓ Abre WhatsApp → Mis chats → Enviar');
-
-  // Limpiar
-  setTimeout(() => {
-    document.getElementById('txtNota').value = '';
-    document.getElementById('prevImg').style.display = 'none';
-    document.getElementById('audioPreview').style.display = 'none';
-    audioBlob = null;
-  }, 2000);
+// ── Voz ─────────────────────────────────────────────────────────────────
+async function botonEnviar(){
+  if(grab){grab.stop();return}
+  if($('txt').value.trim()||fotoBlob||audioBlob){enviar();return}
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});trozos=[];grab=new MediaRecorder(st);
+    grab.ondataavailable=e=>trozos.push(e.data);
+    grab.onstop=()=>{st.getTracks().forEach(t=>t.stop());audioBlob=new Blob(trozos,{type:grab.mimeType||'audio/webm'});grab=null;
+      $('btEnv').classList.remove('grab');$('adjTxt').textContent='🎤 Nota de voz lista';$('adj').classList.remove('oculto');pintarBoton()};
+    grab.start();$('btEnv').classList.add('grab');pintarBoton();toast('Grabando… pulsa ⏹ para parar');
+  }catch(e){toast('Sin permiso de micrófono')}
 }
 
-function toast(msg, error=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (error?' error':'');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+// ── Enviar ──────────────────────────────────────────────────────────────
+async function subir(blob,ext){
+  const ruta=`juanma/${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const {error}=await sb.storage.from(BUCKET).upload(ruta,blob,{contentType:blob.type});
+  if(error)throw error;return ruta;
 }
+async function enviar(){
+  const texto=$('txt').value.trim();
+  try{
+    const fila={de:'juanma',tipo:'texto',texto,etiqueta,responde_a:respA};
+    if(fotoBlob) fila.adjunto_foto=await subir(fotoBlob,'jpg');
+    if(audioBlob) fila.adjunto_audio=await subir(audioBlob,(audioBlob.type.includes('mp4')?'m4a':'webm'));
+    const {error}=await sb.from('eva_chat_mensajes').insert(fila);if(error)throw error;
+    $('txt').value='';autoAlto($('txt'));quitarAdj();quitarResp();
+  }catch(e){toast('No se pudo enviar: '+(e.message||e))}
+}
+
+// ── Notificaciones ──────────────────────────────────────────────────────
+function b64aBytes(b){const p='='.repeat((4-b.length%4)%4);const r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))}
+async function activarAvisos(silencio){
+  try{
+    if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted'){toast('Avisos no permitidos');return}}
+    const reg=await navigator.serviceWorker.ready;
+    const {data}=await sb.from('eva_chat_config').select('valor').eq('clave','vapid_public').maybeSingle();
+    if(!data){if(!silencio)toast('ATIA aún no ha publicado la clave de avisos (abre ATIA en la oficina)');return}
+    let sus=await reg.pushManager.getSubscription();
+    if(!sus) sus=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64aBytes(data.valor)});
+    const j=sus.toJSON();
+    await sb.from('eva_chat_suscripciones').upsert({endpoint:j.endpoint,datos:j});
+    $('btAvisos').classList.add('oculto');if(!silencio)toast('🔔 Avisos activados');
+  }catch(e){if(!silencio)toast('No se pudieron activar los avisos: '+(e.message||e))}
+}
+arrancar();
 </script>
 </body>
 </html>
