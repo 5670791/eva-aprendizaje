@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#0f1d33">
 <title>CHAT EVA-JUANMA</title>
 <link rel="manifest" href="manifest.json">
@@ -12,7 +12,7 @@
 <style>
 :root{--fondo:#0b1220;--cab:#0f1d33;--borde:#1e3a5f;--eva:#13233f;--yo:#1e5b3a;--txt:#e6edf7;--sub:#94a3b8;--azul:#38bdf8;--ambar:#f59e0b;--rojo:#ef4444;--verde:#22c55e}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--fondo);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--fondo);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 body{display:flex;flex-direction:column}
 .oculto{display:none!important}
 header{background:var(--cab);border-bottom:1px solid var(--borde);padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:12px}
@@ -142,6 +142,10 @@ async function cargar(){
 }
 async function marcarLeido(){await sb.from('eva_chat_mensajes').update({leido_movil:true}).eq('de','eva').eq('leido_movil',false)}
 function abajo(){const c=$('chat');c.scrollTop=c.scrollHeight}
+// 08/11/2026 · al salir el teclado, la pantalla se encoge y la caja de texto queda VISIBLE encima
+function ajustarAlto(){const vv=window.visualViewport;if(!vv)return;document.body.style.height=vv.height+'px';window.scrollTo(0,0);abajo()}
+if(window.visualViewport){visualViewport.addEventListener('resize',ajustarAlto);visualViewport.addEventListener('scroll',()=>window.scrollTo(0,0))}
+document.addEventListener('focusin',e=>{if(e.target&&e.target.id==='txt')setTimeout(()=>{ajustarAlto();e.target.scrollIntoView({block:'end'})},250)});
 async function urlFirmada(ruta){const {data}=await sb.storage.from(BUCKET).createSignedUrl(ruta,3600);return data?data.signedUrl:''}
 
 function pintar(m){

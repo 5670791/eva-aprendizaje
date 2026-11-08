@@ -1,6 +1,6 @@
 // CHAT EVA-JUANMA · service worker (avisos y arranque sin conexión)
 // © Juan Manuel Notario — Golden Wash / ATIA-EVA. Patente en trámite.
-const CACHE = 'chat-eva-v1';
+const CACHE = 'chat-eva-v2';
 const BASE = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
